@@ -164,6 +164,18 @@ th{color:var(--ink-soft);font-weight:500;font-size:var(--fs-xs);text-transform:u
 
 .history{display:grid;gap:var(--s2)}
 
+/* ---------- Login ---------- */
+.auth-box{display:flex;align-items:center;gap:var(--s2);min-height:32px}
+.avatar{width:32px;height:32px;border-radius:50%;border:2px solid var(--glass-line)}
+.uname{font-weight:600;font-size:var(--fs-sm)}
+.sync{font-size:var(--fs-xs);color:var(--ink-soft)}
+.sync.error{color:var(--danger)}
+.login{text-align:center;padding:var(--s7) 0;display:flex;flex-direction:column;align-items:center;gap:var(--s3)}
+.login h1{font-family:var(--font-display);font-size:clamp(48px,9vw,112px);line-height:.92;text-transform:uppercase;color:#fff}
+.login p{color:var(--ink-soft);max-width:440px}
+.btn-google{display:inline-flex;align-items:center;gap:var(--s3);background:#fff;color:#1f1f1f;border:0;border-radius:999px;padding:var(--s3) var(--s5);font-weight:600;font-size:var(--fs-md);box-shadow:0 8px 24px rgba(0,0,0,.3);transition:var(--t)}
+.btn-google:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.4)}
+
 /* ---------- Aviso "rutina cargada" ---------- */
 .banner{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);padding:var(--s3);margin-bottom:var(--s3);border-color:var(--accent-hi);flex-wrap:wrap}
 .banner small{display:block;color:var(--ink-soft);font-size:var(--fs-sm)}
@@ -258,10 +270,10 @@ footer{color:var(--ink-soft);font-size:var(--fs-xs);text-align:center;padding:va
   <nav class="nav">
     <a class="logo" href="#/">IRON<b>LOG</b>+</a>
     <div class="nav-links" id="navLinks"></div>
-    <a class="btn btn-ghost btn-sm" href="#/" aria-label="Inicio">Inicio ↗</a>
+    <div class="auth-box" id="authBox"></div>
   </nav>
   <main id="app"></main>
-  <footer>Tus datos se guardan en este navegador (localStorage). · IRONLOG</footer>
+  <footer id="footer">IRONLOG</footer>
 </div>
 
 <!-- Modal para agregar ejercicio -->
@@ -451,16 +463,73 @@ const DEFAULT_ROUTINES = {
   mix2: [ex('Kettlebell swing', 'kettlebell'), ex('Abdominales en polea', 'polea'), ex('Cinta', 'cardio')],
 };
 
-const KEY = 'ironlog-v1';
-function load() {
+const KEY = 'ironlog-v1';           // datos "sin cuenta" (invitado)
+const MODE_KEY = 'ironlog-mode';     // recuerda si elegiste "usar sin cuenta"
+let currentKey = KEY;                // con cuenta pasa a ser 'ironlog-v1-<id del usuario>'
+
+// Se asegura de que los datos tengan la forma correcta (por si vienen incompletos de la nube)
+function normalize(d) {
+  const out = { routines: {}, sessions: Array.isArray(d?.sessions) ? d.sessions : [] };
+  DAYS.forEach(x => { out.routines[x.id] = d?.routines?.[x.id] ?? structuredClone(DEFAULT_ROUTINES[x.id]); });
+  return out;
+}
+function load(key = KEY) {
   try {
-    const d = JSON.parse(localStorage.getItem(KEY));
-    if (d && d.routines && d.sessions) return d;
+    const d = JSON.parse(localStorage.getItem(key));
+    if (d && d.routines && d.sessions) return normalize(d);
   } catch (e) { /* si el JSON está roto, arrancamos de cero */ }
   return { routines: structuredClone(DEFAULT_ROUTINES), sessions: [] };
 }
 let db = load();
-const save = () => localStorage.setItem(KEY, JSON.stringify(db));
+
+// Guardar = 1) copia en el navegador (rápido, funciona sin internet)
+//           2) si iniciaste sesión, también en la nube
+function save() {
+  localStorage.setItem(currentKey, JSON.stringify(db));
+  if (auth.status === 'in') window.cloud?.push(db);
+}
+
+/* ---------- Estado de la sesión (login) ----------
+   status: 'loading' → todavía no sabemos si hay alguien conectado
+           'out'     → nadie inició sesión
+           'in'      → hay un usuario conectado
+           'off'     → Firebase no está configurado: modo local
+   sync:   'ok' | 'saving' | 'error' → estado del guardado en la nube */
+let auth = { status: 'loading', user: null, sync: '', error: '' };
+const isGuest = () => localStorage.getItem(MODE_KEY) === 'guest';
+
+// Lo que cloud.js puede usar de esta página
+window.app = {
+  setAuth(patch) { Object.assign(auth, patch); patch.status ? rerender(false) : paintAuth(); },
+  guestData: () => load(KEY),
+  toast: msg => toast(msg),
+  signedIn(user, data) {
+    localStorage.removeItem(MODE_KEY);
+    currentKey = KEY + '-' + user.uid;
+    db = normalize(data);
+    localStorage.setItem(currentKey, JSON.stringify(db));
+    auth = { status: 'in', user, sync: 'ok', error: '' };
+    current = route(); rerender();
+  },
+  signedOut() {
+    // Si salió, borramos la copia de SU cuenta de este navegador (por si es una compu compartida)
+    if (currentKey !== KEY) localStorage.removeItem(currentKey);
+    currentKey = KEY; db = load(KEY);
+    auth = { status: 'out', user: null, sync: '', error: '' };
+    current = route(); rerender();
+  },
+};
+function useGuest() { localStorage.setItem(MODE_KEY, 'guest'); rerender(); }
+function logout() {
+  if (!confirm('¿Cerrar sesión? Tus datos quedan guardados en tu cuenta.')) return;
+  localStorage.removeItem(MODE_KEY);
+  window.cloud?.logout();
+}
+// Plan B: si en 8 segundos Firebase no respondió (sin internet, o abriste el archivo
+// con doble clic en vez de un servidor), seguimos en modo local para no trabar la página.
+setTimeout(() => {
+  if (auth.status === 'loading' && !window.cloud) window.app.setAuth({ status: 'off', error: 'No se pudo cargar el inicio de sesión. Usando modo local.' });
+}, 8000);
 
 /* ---------- Utilidades de fechas ---------- */
 // Ojo: new Date('2026-11-24') se interpreta en UTC y puede "correrse" un día.
@@ -968,9 +1037,52 @@ function route() {
   return { view: 'home' };
 }
 let current = route();
+/* ---------- Pantalla de inicio de sesión ---------- */
+function renderLogin() {
+  return `<div class="login">
+    <div class="eyebrow">Tu registro de pesos</div>
+    <h1>Tu progreso,<br>en todos lados</h1>
+    <p>Iniciá sesión para guardar tus rutinas y pesos en tu cuenta. Los vas a ver desde el celu y desde la compu.</p>
+    <button class="btn-google" onclick="window.cloud?.login()">
+      <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+      Continuar con Google
+    </button>
+    <button class="link-btn" onclick="useGuest()">Usar sin cuenta (solo en este navegador)</button>
+  </div>`;
+}
+
+// Zona de la derecha del menú: botón de login o el usuario conectado
+function paintAuth() {
+  const box = document.getElementById('authBox');
+  const syncTxt = { ok: '✓ En la nube', saving: 'Guardando…', error: '⚠ Sin sincronizar' }[auth.sync] || '';
+  if (auth.status === 'in') {
+    const u = auth.user;
+    box.innerHTML = `<span class="sync ${auth.sync}">${syncTxt}</span>
+      ${u.photo ? `<img class="avatar" src="${esc(u.photo)}" alt="" referrerpolicy="no-referrer">` : ''}
+      <span class="uname">${esc(String(u.name).split(' ')[0])}</span>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Salir</button>`;
+  } else if (auth.status === 'out') {
+    box.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="window.cloud?.login()">Iniciar sesión</button>`;
+  } else if (auth.status === 'off') {
+    box.innerHTML = `<span class="sync" title="${esc(auth.error || 'Firebase no configurado')}">Modo local</span>`;
+  } else box.innerHTML = '';
+  document.getElementById('footer').textContent = auth.status === 'in'
+    ? 'Tus datos se guardan en tu cuenta (y una copia en este navegador). · IRONLOG'
+    : 'Tus datos se guardan solo en este navegador. · IRONLOG';
+}
+
 function rerender(scrollTop = true) {
   const y = window.scrollY;
   const app = document.getElementById('app');
+  paintAuth();
+  // ¿Mostramos la pantalla de login en vez de la app?
+  const needLogin = !isGuest() && (auth.status === 'out' || auth.status === 'loading');
+  if (needLogin) {
+    app.innerHTML = auth.status === 'loading' ? `<div class="login"><p>Cargando…</p></div>` : renderLogin();
+    document.getElementById('navLinks').innerHTML = '';
+    return;
+  }
+  if (auth.error && auth.status === 'off' && !rerender.warned) { rerender.warned = true; toast(auth.error); }
   app.innerHTML = current.view === 'day' ? renderDay(current.day)
                 : current.view === 'cal' ? renderCalendar(current.sel)
                 : renderHome();
@@ -987,5 +1099,7 @@ window.addEventListener('hashchange', () => {
 });
 rerender();
 </script>
+<!-- Inicio de sesión y nube (archivo aparte porque Firebase usa "módulos") -->
+<script type="module" src="cloud.js"></script>
 </body>
 </html>
