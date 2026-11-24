@@ -77,7 +77,7 @@ button{cursor:pointer}
 .hero{position:relative;text-align:center;padding:var(--s5) 0 var(--s6)}
 .eyebrow{font-size:var(--fs-xs);letter-spacing:3px;text-transform:uppercase;color:var(--accent-hi);font-weight:700}
 .hero h1{font-family:var(--font-display);font-size:var(--fs-hero);line-height:.9;text-transform:uppercase;letter-spacing:1px;margin:var(--s3) 0;
-  background:linear-gradient(180deg,#fff 30%,#a9c6ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  color:#fff;text-shadow:0 8px 40px rgba(4,17,46,.45)}
 .hero p{color:var(--ink-soft);max-width:460px;margin:0 auto var(--s4)}
 
 /* ---------- Tarjetas de vidrio ---------- */
@@ -163,6 +163,41 @@ th{color:var(--ink-soft);font-weight:500;font-size:var(--fs-xs);text-transform:u
 .save-bar{position:sticky;bottom:var(--s3);margin-top:var(--s4);padding:var(--s3);display:flex;justify-content:space-between;align-items:center;gap:var(--s3);flex-wrap:wrap;z-index:5;background:rgba(10,42,107,.75)}
 
 .history{display:grid;gap:var(--s2)}
+
+/* ---------- Aviso "rutina cargada" ---------- */
+.banner{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);padding:var(--s3);margin-bottom:var(--s3);border-color:var(--accent-hi);flex-wrap:wrap}
+.banner small{display:block;color:var(--ink-soft);font-size:var(--fs-sm)}
+.link-btn{background:none;border:0;color:var(--ink);text-decoration:underline;font-size:var(--fs-xs);font-weight:600;margin-left:var(--s2)}
+.link-btn:hover{color:var(--accent-hi)}
+
+/* ---------- Calendario ---------- */
+.cal-layout{display:grid;grid-template-columns:1.5fr 1fr;gap:var(--s3);align-items:start}
+.cal{padding:var(--s3)}
+.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s3);font-size:var(--fs-lg)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--s1)}
+.cal-wd{font-size:var(--fs-xs);color:var(--ink-soft);text-align:center;text-transform:uppercase;letter-spacing:1px;padding-bottom:var(--s1)}
+.cal-day{min-height:72px;border-radius:var(--r-sm);background:rgba(0,0,0,.2);border:1px solid transparent;padding:var(--s1) var(--s2);text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:2px;transition:var(--t)}
+.cal-day:hover{border-color:var(--glass-line)}
+.cal-day span{font-weight:600;font-size:var(--fs-sm)}
+.cal-day.out{opacity:.35}
+.cal-day.today{border-color:var(--accent-hi)}
+.cal-day.sel{background:var(--accent)}
+.cal-day.has:not(.sel){background:rgba(29,95,224,.3)}
+.dot{font-style:normal;font-size:10px;font-weight:700;background:#fff;color:var(--card-ink);border-radius:999px;padding:1px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-detail{padding:var(--s4);position:sticky;top:var(--s3)}
+.det-title{font-size:var(--fs-lg);text-transform:capitalize;margin-bottom:var(--s3)}
+.det-session{display:grid;gap:var(--s2);margin-bottom:var(--s4)}
+.det-top{display:flex;justify-content:space-between;align-items:center}
+.det-ex{padding:var(--s2) 0;border-bottom:1px solid var(--glass-line)}
+.det-ex b{display:block;font-size:var(--fs-md)}
+.det-ex small{color:var(--ink-soft);font-size:var(--fs-sm)}
+.select{background:rgba(0,0,0,.3);border:1px solid var(--glass-line);border-radius:var(--r-sm);padding:var(--s2) var(--s3);min-width:220px}
+.select option{color:#000}
+.prog-sum{padding:var(--s3);font-size:var(--fs-md);display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.delta{font-size:var(--fs-xs);font-weight:700;color:var(--ink-soft)}
+.delta.up{color:#5ee69b}
+.delta.down{color:var(--danger)}
+td a{color:var(--ink)}
 .h-item{padding:var(--s3);display:flex;justify-content:space-between;gap:var(--s3);align-items:center;flex-wrap:wrap}
 .h-item b{display:block}
 .h-item small{color:var(--ink-soft)}
@@ -190,6 +225,8 @@ footer{color:var(--ink-soft);font-size:var(--fs-xs);text-align:center;padding:va
 
 /* ---------- Responsive ---------- */
 @media (max-width:1000px){
+  .cal-layout{grid-template-columns:1fr}
+  .cal-detail{position:static}
   .days{grid-template-columns:repeat(3,1fr)}
   .stats{grid-template-columns:1fr 1fr}
   .stats .progress-card{grid-column:1/-1;order:-1}
@@ -199,6 +236,8 @@ footer{color:var(--ink-soft);font-size:var(--fs-xs);text-align:center;padding:va
   .days{grid-template-columns:1fr 1fr}
   .week-grid{grid-template-columns:repeat(4,1fr)}
   .ex{grid-template-columns:1fr}
+  .cal-day{min-height:52px;padding:2px}
+  .dot{font-size:0;width:8px;height:8px;padding:0}
   .ex .ill{max-width:260px}
   .equip-grid{grid-template-columns:repeat(2,1fr)}
   .mini-grid{grid-template-columns:1fr 1fr;row-gap:var(--s2)}
@@ -546,7 +585,7 @@ function renderWeek() {
 
   return `
     <div class="sec-head">
-      <div><h2>Registro semanal</h2><p>Qué entrenaste cada día y con cuánto peso.</p></div>
+      <div><h2>Registro semanal</h2><p>Qué entrenaste cada día y con cuánto peso. <a href="#/calendario" style="color:var(--ink)">Ver calendario completo →</a></p></div>
       <div class="week-nav">
         <button class="icon-btn" onclick="weekOffset--;rerender()" aria-label="Semana anterior">‹</button>
         <span>${fmtShort(ws)} – ${fmtShort(addDays(ws, 6))}</span>
@@ -567,25 +606,52 @@ function renderWeek() {
    ========================================================= */
 let draft = null; // {day, date, entries:[...]}
 
+// Ejercicios donde con las reps alcanza (no siempre hay peso)
+const NO_WEIGHT_OK = ['corporal', 'cardio'];
+
+// Busca la última vez que hiciste ese ejercicio ANTES de la fecha elegida.
+// Devuelve { date, entry } o null.
+function prevEntry(exId, beforeDate) {
+  const prev = db.sessions.filter(s => s.date < beforeDate && s.entries.some(e => e.exId === exId))
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+  return prev ? { date: prev.date, entry: prev.entries.find(e => e.exId === exId) } : null;
+}
+
 function buildDraft(day, date) {
   const existing = db.sessions.find(s => s.day === day && s.date === date);
   const routine = db.routines[day];
-  // Partimos de la rutina actual; si ya había sesión ese día, recuperamos sus series
+  let fromDate = null; // fecha de la sesión desde la que precargamos
   const entries = routine.map(r => {
     const old = existing?.entries.find(e => e.exId === r.id);
-    return { exId: r.id, name: r.name, equip: r.equip, mode: old?.mode ?? r.mode, sets: old ? structuredClone(old.sets) : [{ w: '', r: '' }] };
+    // Caso 1: ya había sesión ESE día → la mostramos tal cual para editarla
+    if (old) return { exId: r.id, name: r.name, equip: r.equip, mode: old.mode, sets: structuredClone(old.sets) };
+    // Caso 2: sesión nueva → copiamos la "forma" de la última vez:
+    // misma cantidad de series y mismas reps, pero el PESO vacío para que lo completes.
+    // El peso anterior queda como "pista" gris (ph = placeholder).
+    const prev = existing ? null : prevEntry(r.id, date);
+    if (prev) {
+      if (!fromDate || prev.date > fromDate) fromDate = prev.date;
+      return { exId: r.id, name: r.name, equip: r.equip, mode: prev.entry.mode,
+               sets: prev.entry.sets.map(s => ({ w: '', r: s.r, ph: s.w })) };
+    }
+    // Caso 3: ejercicio que nunca hiciste → una serie vacía
+    return { exId: r.id, name: r.name, equip: r.equip, mode: r.mode, sets: [{ w: '', r: '' }] };
   });
-  draft = { day, date, entries, editing: !!existing };
+  draft = { day, date, entries, editing: !!existing, fromDate };
 }
 
-// Busca la última vez que hiciste ese ejercicio ANTES de la fecha elegida
 function lastTime(exId, beforeDate) {
-  const prev = db.sessions.filter(s => s.date < beforeDate && s.entries.some(e => e.exId === exId))
-    .sort((a, b) => b.date.localeCompare(a.date))[0];
-  if (!prev) return '';
-  const e = prev.entries.find(e => e.exId === exId);
-  const best = Math.max(0, ...e.sets.map(st => totalKg(st.w, e.mode)));
-  return `Última vez (${fmtShort(parseD(prev.date))}): ${e.sets.length} series · máx ${best} kg total`;
+  const p = prevEntry(exId, beforeDate);
+  if (!p) return '';
+  const best = Math.max(0, ...p.entry.sets.map(st => totalKg(st.w, p.entry.mode)));
+  return `Última vez (${fmtShort(parseD(p.date))}): ${p.entry.sets.length} series · máx ${best} kg total`;
+}
+
+// Copia los pesos de la última vez (los que estaban como pista gris)
+function copyWeights(i) {
+  const list = i === undefined ? draft.entries : [draft.entries[i]];
+  list.forEach(e => e.sets.forEach(s => { if (s.w === '' && s.ph !== undefined) s.w = s.ph; }));
+  rerender(false);
 }
 
 function renderDay(day) {
@@ -621,9 +687,15 @@ function renderDay(day) {
   </div>
 
   <div class="sec-head">
-    <div><h2>Rutina</h2><p>Personalizala: agregá, quitá o reordená ejercicios.</p></div>
+    <div><h2>Rutina</h2><p>Queda guardada sola: la próxima vez vas a encontrar estos mismos ejercicios.</p></div>
     <button class="btn btn-ghost" onclick="openModal()">+ Agregar ejercicio</button>
   </div>
+
+  ${draft.fromDate ? `<div class="glass banner">
+    <div><b>Rutina cargada desde tu sesión del ${fmtShort(parseD(draft.fromDate))}</b>
+    <small>Mismas series y reps. Solo completá los pesos — en gris ves lo que levantaste la última vez.</small></div>
+    <button class="btn btn-ghost btn-sm" onclick="copyWeights()">↺ Repetir todos los pesos</button>
+  </div>` : ''}
 
   <div class="ex-list">
     ${draft.entries.length ? draft.entries.map((e, i) => renderEx(e, i)).join('') : `<div class="glass empty">Tu rutina está vacía. Agregá tu primer ejercicio.</div>`}
@@ -653,7 +725,8 @@ function renderEx(e, i) {
           <button class="icon-btn danger" onclick="removeEx(${i})" aria-label="Quitar de la rutina">×</button>
         </div>
       </div>
-      <div class="hint">${lastTime(e.exId, draft.date)}</div>
+      <div class="hint">${lastTime(e.exId, draft.date)}
+        ${e.sets.some(s => s.w === '' && s.ph !== undefined) ? `<button class="link-btn" onclick="copyWeights(${i})">↺ mismos pesos</button>` : ''}</div>
       <div class="seg" role="group" aria-label="Tipo de peso">
         <button class="${!lado ? 'on' : ''}" onclick="setMode(${i},'total')">Peso total</button>
         <button class="${lado ? 'on' : ''}" onclick="setMode(${i},'lado')">Por lado</button>
@@ -662,7 +735,7 @@ function renderEx(e, i) {
         ${e.sets.map((st, j) => `
         <div class="set-row">
           <span class="n">${j + 1}</span>
-          <label class="field"><input type="number" inputmode="decimal" min="0" step="0.5" value="${st.w}" placeholder="0"
+          <label class="field"><input type="number" inputmode="decimal" min="0" step="0.5" value="${st.w}" placeholder="${st.ph !== undefined && st.ph !== '' ? esc(st.ph) : '0'}"
               oninput="setVal(${i},${j},'w',this.value)" aria-label="Peso serie ${j + 1}"><span>${lado ? 'kg/lado' : 'kg'}</span></label>
           <label class="field"><input type="number" inputmode="numeric" min="0" step="1" value="${st.r}" placeholder="0"
               oninput="setVal(${i},${j},'r',this.value)" aria-label="Repeticiones serie ${j + 1}"><span>reps</span></label>
@@ -706,9 +779,16 @@ function removeEx(i) {
   db.routines[draft.day].splice(i, 1); draft.entries.splice(i, 1); save(); rerender(false);
 }
 function saveSession() {
-  // Solo guardamos series que tengan algún dato cargado
-  const entries = draft.entries.map(e => ({ ...e, sets: e.sets.filter(s => s.w !== '' || s.r !== '') }));
-  if (!entries.some(e => e.sets.length)) { toast('Cargá al menos una serie antes de guardar'); return; }
+  // Qué series guardamos:
+  // - Con peso cargado → siempre.
+  // - Sin peso → solo en peso corporal / cardio (ahí las reps solas tienen sentido).
+  // Así, si salteaste un ejercicio y solo quedaron las reps precargadas, no se guarda "basura".
+  const entries = draft.entries.map(e => ({
+    exId: e.exId, name: e.name, equip: e.equip, mode: e.mode,
+    sets: e.sets.filter(s => s.w !== '' || (NO_WEIGHT_OK.includes(e.equip) && s.r !== ''))
+                .map(s => ({ w: s.w, r: s.r })) // sacamos la "pista" ph antes de guardar
+  }));
+  if (!entries.some(e => e.sets.length)) { toast('Cargá al menos un peso antes de guardar'); return; }
   const idx = db.sessions.findIndex(s => s.day === draft.day && s.date === draft.date);
   const session = { id: idx >= 0 ? db.sessions[idx].id : uid(), day: draft.day, date: draft.date, entries };
   if (idx >= 0) db.sessions[idx] = session; else db.sessions.push(session);
@@ -720,6 +800,121 @@ function deleteSession(id) {
   db.sessions = db.sessions.filter(x => x.id !== id); save();
   if (draft && draft.date === s.date && draft.day === s.day) buildDraft(draft.day, draft.date);
   rerender(false);
+}
+
+/* =========================================================
+   5b) CALENDARIO + PROGRESO POR EJERCICIO
+   El calendario es una grilla de 7 columnas (lun → dom).
+   Para que el día 1 caiga en la columna correcta, arrancamos
+   desde el LUNES de la semana del día 1 (aunque sea del mes anterior).
+   ========================================================= */
+let calOffset = 0;   // 0 = mes actual, -1 = mes anterior...
+let progEx = null;   // id del ejercicio elegido en "Progreso"
+
+function renderCalendar(selDate) {
+  const now = new Date();
+  const first = new Date(now.getFullYear(), now.getMonth() + calOffset, 1);
+  const month = first.getMonth();
+  const start = weekStart(first);
+  const t = today();
+
+  let cells = '';
+  for (let i = 0; i < 42; i++) { // 6 semanas x 7 días cubre cualquier mes
+    const d = addDays(start, i); const iso = fmtISO(d);
+    if (i >= 35 && d.getMonth() !== month) break; // si la 6ª semana sobra, no la dibujamos
+    const ss = db.sessions.filter(s => s.date === iso);
+    cells += `<a href="#/calendario/${iso}" class="cal-day ${d.getMonth() !== month ? 'out' : ''} ${iso === t ? 'today' : ''} ${iso === selDate ? 'sel' : ''} ${ss.length ? 'has' : ''}">
+      <span>${d.getDate()}</span>
+      ${ss.map(s => `<i class="dot">${dayName(s.day)}</i>`).join('')}
+    </a>`;
+  }
+  const title = first.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+
+  return `
+  <div class="day-hero">
+    <div><div class="eyebrow">Tu historial completo</div><h1>Calendario</h1></div>
+  </div>
+
+  <div class="cal-layout">
+    <div class="glass cal">
+      <div class="cal-head">
+        <button class="icon-btn" onclick="calOffset--;rerender(false)" aria-label="Mes anterior">‹</button>
+        <b style="text-transform:capitalize">${title}</b>
+        <button class="icon-btn" onclick="calOffset++;rerender(false)" aria-label="Mes siguiente">›</button>
+      </div>
+      <div class="cal-grid">
+        ${['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(n => `<span class="cal-wd">${n}</span>`).join('')}
+        ${cells}
+      </div>
+    </div>
+    <div class="glass cal-detail">${renderDayDetail(selDate)}</div>
+  </div>
+
+  <section>${renderProgress()}</section>`;
+}
+
+// Panel derecho: qué hiciste el día elegido, ejercicio por ejercicio
+function renderDayDetail(date) {
+  if (!date) return `<div class="empty">Tocá un día del calendario para ver qué levantaste.</div>`;
+  const ss = db.sessions.filter(s => s.date === date);
+  const head = `<h3 class="det-title">${fmtLong(date)}</h3>`;
+  if (!ss.length) return head + `<div class="empty">Ese día no entrenaste.</div>`;
+  return head + ss.map(s => `
+    <div class="det-session">
+      <div class="det-top"><span class="chip">${dayName(s.day)}</span>
+        <a class="btn btn-ghost btn-sm" href="#/dia/${s.day}/${s.date}">Editar</a></div>
+      ${s.entries.filter(e => e.sets.length).map(e => `
+        <div class="det-ex">
+          <b>${esc(e.name)}</b>
+          <small>${e.sets.map(st => st.w !== '' ? `${st.w}${e.mode === 'lado' ? ' kg/lado' : ' kg'} × ${st.r || 0}` : `${st.r} reps`).join(' · ')}</small>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+// Tabla de progreso: una fila por sesión en la que hiciste ese ejercicio
+function renderProgress() {
+  // Juntamos todos los ejercicios que aparecen en tus sesiones (sin repetir)
+  const all = new Map();
+  db.sessions.forEach(s => s.entries.forEach(e => { if (e.sets.length) all.set(e.exId, e.name); }));
+  const head = `<div class="sec-head"><div><h2>Progreso por ejercicio</h2>
+    <p>Cuánto levantaste cada semana y cuánto subiste o bajaste.</p></div>`;
+  if (!all.size) return head + `</div><div class="glass empty">Cuando guardes entrenamientos, acá vas a ver tu evolución.</div>`;
+  if (!all.has(progEx)) progEx = all.keys().next().value;
+
+  const rows = db.sessions
+    .filter(s => s.entries.some(e => e.exId === progEx && e.sets.length))
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map(s => {
+      const e = s.entries.find(e => e.exId === progEx);
+      const best = Math.max(0, ...e.sets.map(st => totalKg(st.w, e.mode)));
+      return { date: s.date, best, e };
+    });
+
+  // Calculamos la diferencia contra la sesión ANTERIOR (por eso recorremos en orden de fecha)
+  const body = rows.map((r, i) => {
+    const diff = i ? r.best - rows[i - 1].best : null;
+    const badge = diff === null ? '<span class="delta">—</span>'
+      : diff > 0 ? `<span class="delta up">▲ +${diff} kg</span>`
+      : diff < 0 ? `<span class="delta down">▼ ${diff} kg</span>`
+      : '<span class="delta">= igual</span>';
+    return `<tr>
+      <td>Semana del ${fmtShort(weekStart(parseD(r.date)))}</td>
+      <td><a href="#/calendario/${r.date}">${fmtShort(parseD(r.date))}</a></td>
+      <td>${r.e.sets.map(st => `${st.w || 0}${r.e.mode === 'lado' ? '×2' : ''} × ${st.r || 0}`).join(' · ')}</td>
+      <td><b>${r.best} kg</b></td><td>${badge}</td></tr>`;
+  }).reverse().join(''); // lo más reciente arriba
+
+  const firstB = rows[0].best, lastB = rows.at(-1).best;
+  return head + `
+    <select class="select" onchange="progEx=this.value;rerender(false)" aria-label="Elegir ejercicio">
+      ${[...all].map(([id, n]) => `<option value="${id}" ${id === progEx ? 'selected' : ''}>${esc(n)}</option>`).join('')}
+    </select></div>
+    <div class="glass week-table">
+      <div class="prog-sum">De <b>${firstB} kg</b> a <b>${lastB} kg</b> en ${rows.length} sesiones
+        ${lastB - firstB > 0 ? `<span class="delta up">▲ +${lastB - firstB} kg en total</span>` : ''}</div>
+      <table><thead><tr><th>Semana</th><th>Fecha</th><th>Series</th><th>Máx. total</th><th>vs. anterior</th></tr></thead>
+      <tbody>${body}</tbody></table>
+    </div>`;
 }
 
 /* ---------- Modal: agregar ejercicio ---------- */
@@ -764,17 +959,32 @@ function route() {
     buildDraft(day, dt);
     return { view: 'day', day };
   }
+  if (page === 'calendario') {
+    const sel = /^\d{4}-\d{2}-\d{2}$/.test(day || '') ? day : null;
+    // Si elegiste un día de otro mes (ej: desde la tabla de progreso), movemos el calendario a ese mes
+    if (sel) { const d = parseD(sel), n = new Date(); calOffset = (d.getFullYear() - n.getFullYear()) * 12 + d.getMonth() - n.getMonth(); }
+    return { view: 'cal', sel };
+  }
   return { view: 'home' };
 }
 let current = route();
 function rerender(scrollTop = true) {
   const y = window.scrollY;
-  document.getElementById('app').innerHTML = current.view === 'day' ? renderDay(current.day) : renderHome();
+  const app = document.getElementById('app');
+  app.innerHTML = current.view === 'day' ? renderDay(current.day)
+                : current.view === 'cal' ? renderCalendar(current.sel)
+                : renderHome();
   document.getElementById('navLinks').innerHTML = DAYS.map(d =>
-    `<a href="#/dia/${d.id}" class="${current.day === d.id ? 'on' : ''}">${d.name}</a>`).join('');
+    `<a href="#/dia/${d.id}" class="${current.day === d.id ? 'on' : ''}">${d.name}</a>`).join('')
+    + `<a href="#/calendario" class="${current.view === 'cal' ? 'on' : ''}">📅 Calendario</a>`;
   window.scrollTo(0, scrollTop ? 0 : y);
 }
-window.addEventListener('hashchange', () => { current = route(); rerender(); });
+window.addEventListener('hashchange', () => {
+  const wasCal = current.view === 'cal';
+  current = route();
+  // Dentro del calendario no saltamos arriba al tocar un día (sería molesto)
+  rerender(!(wasCal && current.view === 'cal'));
+});
 rerender();
 </script>
 </body>
